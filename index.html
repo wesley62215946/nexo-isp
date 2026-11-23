@@ -24,6 +24,59 @@
       document.head.appendChild(style);
     });
   </script>
+  <style id="nexo-submenu-fix">
+    /* Submenus em painel flutuante, no padrão do Integrator original. */
+    #sideNav .nav-group { position: relative; overflow: visible !important; }
+    #sidebar, #sidebar .sidebar-scroll, #sideNav { overflow: visible !important; }
+    #sideNav .nav-submenu {
+      display: none !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 100% !important;
+      min-width: 205px !important;
+      padding: 7px 0 !important;
+      margin: 0 !important;
+      background: #fff !important;
+      border: 1px solid #d7dce5 !important;
+      box-shadow: 0 8px 22px rgba(18, 38, 68, .22) !important;
+      z-index: 10050 !important;
+      flex-direction: column !important;
+      animation: nexoSubmenuIn .16s ease-out both;
+    }
+    #sideNav .nav-group:hover > .nav-submenu,
+    #sideNav .nav-group:focus-within > .nav-submenu,
+    #sideNav .nav-group.submenu-open > .nav-submenu {
+      display: flex !important;
+    }
+    #sideNav .nav-submenu button {
+      display: flex !important;
+      align-items: center !important;
+      width: 100% !important;
+      min-height: 43px !important;
+      padding: 10px 15px !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: #fff !important;
+      color: #243b5a !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+      cursor: pointer !important;
+      font: inherit !important;
+    }
+    #sideNav .nav-submenu button:hover,
+    #sideNav .nav-submenu button:focus-visible {
+      background: #edf3fb !important;
+      color: #0649a2 !important;
+      outline: none;
+    }
+    @keyframes nexoSubmenuIn {
+      from { opacity: 0; transform: translateX(-5px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @media (max-width: 760px) {
+      #sideNav .nav-group.submenu-open > .nav-submenu { left: 100% !important; }
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -51,7 +104,6 @@
         </div>
       </div>
     </header>
-
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-scroll">
         <nav id="sideNav" aria-label="Navegação principal">
@@ -93,6 +145,18 @@
   <div class="modal-root" id="modalRoot"></div>
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
   <script>
+    // Em telas touch, o primeiro toque abre o submenu; o segundo ativa a opção.
+    document.addEventListener('click', function(event) {
+      const trigger = event.target.closest('#sideNav .nav-item[data-group]');
+      if (trigger) {
+        const group = trigger.closest('.nav-group');
+        const wasOpen = group.classList.contains('submenu-open');
+        document.querySelectorAll('#sideNav .nav-group.submenu-open').forEach(item => item.classList.remove('submenu-open'));
+        if (!wasOpen) group.classList.add('submenu-open');
+      } else if (!event.target.closest('#sideNav .nav-submenu')) {
+        document.querySelectorAll('#sideNav .nav-group.submenu-open').forEach(item => item.classList.remove('submenu-open'));
+      }
+    });
     (async () => {
       await window.__nexoStyleReady;
       const source = await loadGzipText('./app.js.gz.part', 5);
